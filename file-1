@@ -21,6 +21,12 @@ sudo systemctl enable jenkins
 sudo systemctl start jenkins
 sudo systemctl status jenkins
 
+sudo nano /etc/default/jenkins
+HTTP_PORT=8082
+sudo systemctl restart jenkins
+sudo systemctl status jenkins
+sudo ss -tulnp | grep 8082
+
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
 -- JENKINS-INSTALLATION-METHOD
