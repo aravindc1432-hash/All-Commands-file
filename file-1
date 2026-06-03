@@ -105,6 +105,34 @@ docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
 
 -- OWASP Dependency Check
 
+wget https://github.com/dependency-check/DependencyCheck/releases/download/v12.2.2/dependency-check-12.2.2-release.zip
+apt install unzip
+unzip dependency-check-12.2.2-release.zip
+rm -rf dependency-check-12.2.2-release.zip
+
+$ ./bin/dependency-check.sh -h
+$ ./bin/dependency-check.sh --out /root/dirName/Petclinic/ --scan /root/dirName/Petclinic/target/
+
+
+
+-- NEXUS REPOSITORY
+
+java -version
+wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+tar -xf latest-unix.tar.gz
+chmod +x nexus
+./nexus start
+
+METHOD-2 INSTALL NEXUS USING DOCKER
+docker run -d --name nexus -p 8081:8081 sonatype/nexus3
+
+
+
+
+
+
+
+
 
 
 
