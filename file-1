@@ -123,8 +123,8 @@ apt install unzip
 unzip dependency-check-12.2.2-release.zip
 rm -rf dependency-check-12.2.2-release.zip
 
-$ ./bin/dependency-check.sh -h
-$ ./bin/dependency-check.sh --out /root/dirName/Petclinic/ --scan /root/dirName/Petclinic/target/
+./bin/dependency-check.sh -h
+./bin/dependency-check.sh --out /root/dirName/Petclinic/ --scan /root/dirName/Petclinic/target/
 
 
 
