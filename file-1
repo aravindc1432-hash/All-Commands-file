@@ -21,11 +21,15 @@ sudo systemctl enable jenkins
 sudo systemctl start jenkins
 sudo systemctl status jenkins
 
-sudo nano /etc/default/jenkins
-HTTP_PORT=8082
+sudo systemctl edit jenkins
+###########################
+[Service]
+Environment="JENKINS_PORT=8082"
+#############################
+sudo systemctl daemon-reload
 sudo systemctl restart jenkins
-sudo systemctl status jenkins
-sudo ss -tulnp | grep 8082
+sudo ss -tulnp | grep -E '8080|8082'
+
 
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
@@ -76,6 +80,9 @@ sudo cp target/*.war /opt/apache-tomcat-9.0.65/webapps/
 
 sudo apt install docker-compose
 sudo chmod 666 /var/run/docker.sock
+
+sudo apt remove docker-compose-v2 -y
+sudo apt --fix-broken install -y
 
 sudo apt-get update
 sudo apt-get install -y ca-certificates curl
