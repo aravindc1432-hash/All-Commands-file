@@ -46,6 +46,14 @@ pipeline {
             }
         }
 
+
+        stage("OWASP Dependency Check"){
+            steps{
+                dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+
         stage("Deploy To Tomcat") {
             steps {
                 sh "cp target/*.war /opt/apache-tomcat-9.0.65/webapps/"
