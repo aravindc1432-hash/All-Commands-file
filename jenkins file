@@ -17,7 +17,7 @@ pipeline {
         stage("Git Checkout") {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/aravindc1432-hash/Petclinic.git'
+                    url: 'https://github.com/aravindc1432-hash/Petclinic.git'
             }
         }
 
@@ -26,19 +26,12 @@ pipeline {
                 sh "mvn clean verify"
             }
         }
-        
-        stage("Test") {
-            steps {
-                sh "mvn test"
-            }
-        }
 
         stage("SonarQube Analysis") {
             steps {
                 withSonarQubeEnv('sonar-server') {
-
                     sh """
-                    $SCANNER_HOME/bin/sonar-scanner \
+                    ${SCANNER_HOME}/bin/sonar-scanner \
                     -Dsonar.projectName=Petclinic \
                     -Dsonar.projectKey=Petclinic \
                     -Dsonar.sources=src/main/java \
@@ -50,34 +43,34 @@ pipeline {
                 }
             }
         }
-        
-        stage("BUILD") {
+
+        stage("OWASP Dependency Check") {
             steps {
-                sh "mvn package"
-            }
-        }
-
-
-        stage("OWASP Dependency Check"){
-            steps{
                 dependencyCheck(
-                    additionalArguments: '''--scan target/ --format XML  --format HTML --out . --disableAssembly''',
+                    additionalArguments: '''--scan target/ --format XML --format HTML --out . --disableAssembly''',
                     odcInstallation: 'owasp'
                 )
 
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+            }
+        }
+
+        stage("Maven Deploy To Nexus") {
+            steps {
+                configFileProvider([configFile(fileId: 'a40a1a4c-cac1-405c-bfc8-b31c50407bcc', variable: 'mavensettings')]) {
+                    sh "mvn -s $mavensettings clean deploy -DskipTests=true"
+                }
             }
         }
 
         stage("Deploy To Tomcat") {
             steps {
-                sh "cp target/*.war /opt/apache-tomcat-9.0.65/webapps/"
+                sh "cp target/petclinic.war /opt/apache-tomcat-9.0.65/webapps/"
             }
         }
     }
 
     post {
-
         success {
             echo "Pipeline executed successfully"
         }
@@ -86,4 +79,4 @@ pipeline {
             echo "Pipeline failed"
         }
     }
-}
+}  
