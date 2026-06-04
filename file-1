@@ -113,7 +113,17 @@ docker --version
 docker compose version
 docker run hello-world
 
-# TO ISNTALL SONARQUBE USING DOCKER RUN BELOW COMMAND  
+docker volume rm sonarqube_data sonarqube_extensions sonarqube_logs
+# TO ISNTALL SONARQUBE USING DOCKER RUN BELOW COMMAND
+docker run -d --name sonar \
+  -p 9000:9000 \
+  -v sonarqube_data:/opt/sonarqube/data \
+  -v sonarqube_extensions:/opt/sonarqube/extensions \
+  -v sonarqube_logs:/opt/sonarqube/logs \
+  sonarqube:lts-community
+
+OR
+
 docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
 
 -- OWASP Dependency Check
