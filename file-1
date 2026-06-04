@@ -141,13 +141,16 @@ rm -rf dependency-check-12.2.2-release.zip
 -- NEXUS REPOSITORY
 
 java -version
-wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
-tar -xf latest-unix.tar.gz
+cd /opt
+wget https://download.sonatype.com/nexus/3/nexus-3.92.2-01-linux-x86_64.tar.gz
+cd nexus-3.92.2-01 --> cd bin 
 chmod +x nexus
 ./nexus start
 
 METHOD-2 INSTALL NEXUS USING DOCKER
-docker run -d --name nexus -p 8081:8081 sonatype/nexus3
+cd /opt
+rm -f latest-unix.tar.gz nexus.tar.gz
+docker run -d --name nexus -p 8081:8081 -v nexus-data:/nexus-data sonatype/nexus3
 
 
 
