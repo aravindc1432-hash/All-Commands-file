@@ -152,6 +152,11 @@ cd /opt
 rm -f latest-unix.tar.gz nexus.tar.gz
 docker run -d --name nexus -p 8081:8081 -v nexus-data:/nexus-data sonatype/nexus3
 
+cat /opt/sonatype-work/nexus3/admin.password
+copy password
+usernmae-admin
+change the password
+
 
 
 
