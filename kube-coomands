@@ -1,24 +1,49 @@
-# Kubernetes Cluster Setup Commands
+# Kubernetes Master and Worker Node Setup Commands
 
-## MASTER NODE COMMANDS
+# MASTER NODE SETUP
 
-### 1. Update System
+## Update Packages
 
+```bash
 sudo apt-get update -y
+```
 
-### 2. Install Docker
+---
 
+## Install Docker
+
+```bash
 sudo apt-get install docker.io -y
+```
 
+```bash
 sudo systemctl enable docker
 sudo systemctl restart docker
+```
 
-### 3. Install Kubernetes Packages
+Check Docker Version:
 
+```bash
+docker --version
+```
+
+---
+
+# Install Kubernetes Components
+
+## Install Required Packages
+
+```bash
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+```
 
+---
 
+## Add Kubernetes Repository
+
+```bash
 sudo mkdir -p /etc/apt/keyrings
+```
 
 ```bash
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | \
@@ -29,6 +54,10 @@ sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | \
 sudo tee /etc/apt/sources.list.d/kubernetes.list
 ```
+
+---
+
+## Install Kubernetes Packages
 
 ```bash
 sudo apt-get update -y
@@ -42,17 +71,25 @@ sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 ```
 
-Check Versions:
+---
+
+## Verify Kubernetes Installation
 
 ```bash
 kubeadm version
+```
+
+```bash
 kubectl version --client
+```
+
+```bash
 kubelet --version
 ```
 
 ---
 
-### 4. Disable Swap
+# Disable Swap
 
 ```bash
 sudo swapoff -a
@@ -64,13 +101,11 @@ sudo sed -i '/ swap / s/^/#/' /etc/fstab
 
 ---
 
-### 5. Enable Kernel Modules
+# Configure Kernel Parameters
 
 ```bash
 sudo modprobe br_netfilter
 ```
-
-Create sysctl config:
 
 ```bash
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
@@ -79,8 +114,6 @@ net.bridge.bridge-nf-call-ip6tables = 1
 net.ipv4.ip_forward = 1
 EOF
 ```
-
-Apply:
 
 ```bash
 sudo sysctl --system
@@ -92,7 +125,7 @@ Verify:
 cat /proc/sys/net/bridge/bridge-nf-call-iptables
 ```
 
-Expected output:
+Expected Output:
 
 ```bash
 1
@@ -100,7 +133,7 @@ Expected output:
 
 ---
 
-### 6. Configure containerd
+# Configure containerd
 
 ```bash
 sudo mkdir -p /etc/containerd
@@ -120,10 +153,19 @@ Verify:
 grep SystemdCgroup /etc/containerd/config.toml
 ```
 
-Restart services:
+Expected Output:
+
+```bash
+SystemdCgroup = true
+```
+
+Restart Services:
 
 ```bash
 sudo systemctl restart containerd
+```
+
+```bash
 sudo systemctl restart kubelet
 ```
 
@@ -135,7 +177,7 @@ sudo systemctl enable kubelet
 
 ---
 
-### 7. Initialize Kubernetes Master
+# Initialize Kubernetes Master Node
 
 ```bash
 sudo kubeadm init --pod-network-cidr=192.168.0.0/16
@@ -143,7 +185,7 @@ sudo kubeadm init --pod-network-cidr=192.168.0.0/16
 
 ---
 
-### 8. Configure kubectl for Master User
+# Configure kubectl Access
 
 ```bash
 mkdir -p $HOME/.kube
@@ -159,15 +201,29 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 ---
 
-### 9. Install Calico Network Plugin
+# Install Calico Network Plugin
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml --validate=false
 ```
 
+Alternative Calico Version:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/calico.yaml
+```
+
 ---
 
-### 10. Check Cluster Status
+# Install NGINX Ingress Controller
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.49.0/deploy/static/provider/baremetal/deploy.yaml
+```
+
+---
+
+# Verify Cluster
 
 ```bash
 kubectl get nodes
@@ -179,7 +235,7 @@ kubectl get pods -A
 
 ---
 
-### 11. Generate Worker Join Command
+# Generate Worker Join Command
 
 ```bash
 kubeadm token create --print-join-command
@@ -187,9 +243,9 @@ kubeadm token create --print-join-command
 
 ---
 
-## SLAVE / WORKER NODE COMMANDS
+# WORKER / SLAVE NODE SETUP
 
-### 1. Update System
+## Update Packages
 
 ```bash
 sudo apt-get update -y
@@ -197,7 +253,7 @@ sudo apt-get update -y
 
 ---
 
-### 2. Install Docker
+## Install Docker
 
 ```bash
 sudo apt-get install docker.io -y
@@ -208,7 +264,7 @@ sudo systemctl enable docker
 sudo systemctl restart docker
 ```
 
-Check Docker:
+Verify:
 
 ```bash
 docker --version
@@ -216,11 +272,17 @@ docker --version
 
 ---
 
-### 3. Install Kubernetes Packages
+# Install Kubernetes Components
+
+## Install Required Packages
 
 ```bash
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 ```
+
+---
+
+## Add Kubernetes Repository
 
 ```bash
 sudo mkdir -p /etc/apt/keyrings
@@ -236,6 +298,10 @@ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 sudo tee /etc/apt/sources.list.d/kubernetes.list
 ```
 
+---
+
+## Install Kubernetes Packages
+
 ```bash
 sudo apt-get update -y
 ```
@@ -250,7 +316,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 ---
 
-### 4. Disable Swap
+# Disable Swap
 
 ```bash
 sudo swapoff -a
@@ -262,13 +328,11 @@ sudo sed -i '/ swap / s/^/#/' /etc/fstab
 
 ---
 
-### 5. Enable Kernel Modules
+# Configure Kernel Parameters
 
 ```bash
 sudo modprobe br_netfilter
 ```
-
-Create sysctl config:
 
 ```bash
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
@@ -278,15 +342,13 @@ net.ipv4.ip_forward = 1
 EOF
 ```
 
-Apply:
-
 ```bash
 sudo sysctl --system
 ```
 
 ---
 
-### 6. Configure containerd
+# Configure containerd
 
 ```bash
 sudo mkdir -p /etc/containerd
@@ -300,10 +362,13 @@ containerd config default | sudo tee /etc/containerd/config.toml
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 ```
 
-Restart services:
+Restart Services:
 
 ```bash
 sudo systemctl restart containerd
+```
+
+```bash
 sudo systemctl restart kubelet
 ```
 
@@ -315,9 +380,39 @@ sudo systemctl enable kubelet
 
 ---
 
-### 7. Join Worker Node to Cluster
+# Reset Worker Node (If Join Failed)
 
-Run the join command generated on master:
+```bash
+sudo kubeadm reset -f
+```
+
+```bash
+sudo rm -rf /etc/kubernetes/pki
+```
+
+```bash
+sudo rm -rf /var/lib/kubelet/*
+```
+
+```bash
+sudo rm -rf /etc/cni/net.d
+```
+
+Restart:
+
+```bash
+sudo systemctl restart containerd
+```
+
+```bash
+sudo systemctl restart kubelet
+```
+
+---
+
+# Join Worker Node to Cluster
+
+Run the join command generated from master node:
 
 ```bash
 kubeadm join <MASTER-IP>:6443 --token <TOKEN> \
@@ -332,7 +427,7 @@ kubeadm join 172.31.26.147:6443 --token tij06v.kb2vqjikgd2ruml8 --discovery-toke
 
 ---
 
-## VERIFY CLUSTER
+# Verify Worker Node from Master
 
 Run on master node:
 
@@ -340,13 +435,17 @@ Run on master node:
 kubectl get nodes
 ```
 
-```bash
-kubectl get pods -A
+Expected Output:
+
+```text
+NAME               STATUS   ROLES           AGE   VERSION
+ip-172-31-26-147   Ready    control-plane   XXm   v1.29.15
+ip-172-31-22-63    Ready    <none>          XXm   v1.29.15
 ```
 
 ---
 
-## TEST DEPLOYMENT
+# Test Kubernetes Deployment
 
 Create nginx deployment:
 
@@ -354,7 +453,7 @@ Create nginx deployment:
 kubectl create deployment nginx --image=nginx
 ```
 
-Expose service:
+Expose deployment:
 
 ```bash
 kubectl expose deployment nginx --type=NodePort --port=80
